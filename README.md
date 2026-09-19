@@ -110,9 +110,17 @@ Com o servidor rodando, você pode visualizar o app de várias formas:
 
 ## 🧩 Tecnologias utilizadas
 
-- [Expo](https://expo.dev) — framework para desenvolvimento React Native
-- [Expo Router](https://docs.expo.dev/router/introduction/) — roteamento baseado em arquivos
+- [Expo](https://expo.dev) 
+- [Expo Router](https://docs.expo.dev/router/introduction/) 
 - [React Native](https://reactnative.dev)
 - [TypeScript](https://www.typescriptlang.org)
+- [NativeWind](https://www.nativewind.dev)
 
 ---
+
+## 👥 Autores
+ 
+Projeto desenvolvido por:
+ 
+- **José Fernando Avelino**
+- **João Pedro de Holanda**
