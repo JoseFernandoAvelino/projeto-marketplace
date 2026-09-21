@@ -10,7 +10,7 @@ Este app funciona como uma vitrine digital: qualquer pessoa cadastrada pode anun
 
 ### Funcionalidades principais
 
-- **Cadastro de usuários**, com Nome, CPF, E-mail e Senha — qualquer usuário pode tanto comprar quanto anunciar produtos.
+- **Cadastro de usuários**, com Nome, E-mail e Senha — qualquer usuário pode tanto comprar quanto anunciar produtos.
 - **Login** com validação de e-mail e senha.
 - **Vitrine de produtos** (aba _Home_), com nome, preço e condição do item.
 - **Anunciar produto** (aba _Anunciar_), para o usuário colocar seus próprios itens à venda.
