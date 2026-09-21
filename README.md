@@ -129,7 +129,6 @@ Com o servidor rodando, você pode visualizar o app de várias formas:
 - [Expo Router](https://docs.expo.dev/router/introduction/)
 - [React Native](https://reactnative.dev)
 - [TypeScript](https://www.typescriptlang.org)
-- [NativeWind](https://www.nativewind.dev)
 
 ---
 
