@@ -33,7 +33,7 @@ O design das interfaces e o protótipo navegável foram desenvolvidos no Figma.
 
 Abaixo se encontra o Diagrama de Casos de Uso, que ilustra as principais interações dos utilizadores com as funcionalidades do sistema:
 
-![Diagrama de Casos de Uso](.\docs\diagrama_de_casos_uso.jpeg)
+![Diagrama de Casos de Uso](/docs/diagrama_de_casos_uso.jpeg)
 
 ---
 
