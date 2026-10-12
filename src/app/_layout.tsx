@@ -6,10 +6,7 @@ export default function RootLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="cadastro" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="produto/[id]"
-        options={{ headerShown: true, title: "Detalhes" }}
-      />
+      <Stack.Screen name="produto/[id]" />
     </Stack>
   );
 }

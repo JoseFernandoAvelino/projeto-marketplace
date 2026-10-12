@@ -1,17 +1,31 @@
-import { Ionicons } from "@expo/vector-icons"; // Importando a biblioteca de ícones do Expo
+import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function TabLayout() {
+export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#007BFF", // Cor do ícone e texto quando a aba está selecionada
-        tabBarInactiveTintColor: "#888", // Cor quando não está selecionada
+        tabBarActiveTintColor: "#006D43",
+        tabBarInactiveTintColor: "#6D7A70",
         tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 0,
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          height: 65 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          marginTop: 4,
         },
       }}
     >
@@ -19,38 +33,49 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Início",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="storefront" size={26} color={color} />
           ),
         }}
       />
-
       <Tabs.Screen
-        name="mensagens"
+        name="explorar"
         options={{
-          title: "Chat",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+          title: "Explorar",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="explore" size={24} color={color} />
           ),
         }}
       />
-
       <Tabs.Screen
         name="anunciar"
         options={{
-          title: "Vender",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
+          title: "Anunciar",
+          tabBarIcon: () => (
+            <View
+              className="w-14 h-14 bg-[#00995D] rounded-full items-center justify-center shadow-lg elevation-4"
+              style={{ top: -12 }}
+            >
+              <MaterialIcons name="add" size={32} color="#FFF" />
+            </View>
           ),
         }}
       />
-
+      <Tabs.Screen
+        name="mensagens"
+        options={{
+          title: "Conversas",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="chat-bubble-outline" size={24} color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="perfil"
         options={{
           title: "Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="person-outline" size={26} color={color} />
           ),
         }}
       />

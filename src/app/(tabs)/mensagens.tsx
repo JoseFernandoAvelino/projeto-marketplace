@@ -1,78 +1,106 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-interface Mensagem {
-  id: string;
-  nome: string;
-  ultimaMensagem: string;
-  hora: string;
-}
-
-const conversas: Mensagem[] = [
-  {
-    id: "1",
-    nome: "Cliente 1",
-    ultimaMensagem: "Este perfume está disponível?",
-    hora: "10:30",
-  },
-  {
-    id: "2",
-    nome: "Cliente 2",
-    ultimaMensagem: "Este celular está disponível?",
-    hora: "Ontem",
-  },
-];
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ConversaCard } from "../../components/ConversaCard";
 
 export default function Mensagens() {
+  const conversas = [
+    {
+      id: "1",
+      nome: "Vendedor 1",
+      produto: "Headfone ANC",
+      ultimaMensagem: "Fechado por R$300 na Praça do centro!",
+      tempo: "14:30",
+      naoLida: true,
+    },
+    {
+      id: "2",
+      nome: "Vendedor 2",
+      produto: "Jaqueta Couro Legítimo",
+      ultimaMensagem: "Faz por R$250 se eu buscar hoje a noite?",
+      tempo: "Ontem",
+      naoLida: true,
+    },
+    {
+      id: "3",
+      nome: "Vendedor 3",
+      produto: "Café Arábico",
+      ultimaMensagem: "Obrigado! Aguardo o envio.",
+      tempo: "Segunda",
+      naoLida: false,
+    },
+    {
+      id: "4",
+      nome: "Vendedor 4",
+      produto: "Cadeira Ergonômica",
+      ultimaMensagem: "Aceita troca num monitor de 24 polegadas?",
+      tempo: "02/10",
+      naoLida: false,
+    },
+  ];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Caixa de Entrada</Text>
-      <FlatList
-        data={conversas}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.chatCard}>
-            <View style={styles.chatHeader}>
-              <Text style={styles.chatName}>{item.nome}</Text>
-              <Text style={styles.chatTime}>{item.hora}</Text>
-            </View>
-            <Text style={styles.chatText}>{item.ultimaMensagem}</Text>
+    <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
+      <View className="px-5 pt-3 pb-4 bg-white shadow-sm elevation-1 z-10">
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-2xl font-black text-[#111]">Mensagens</Text>
+          <TouchableOpacity className="w-10 h-10 rounded-full bg-[#E8EEF5] items-center justify-center">
+            <MaterialIcons name="filter-list" size={22} color="#006D43" />
           </TouchableOpacity>
-        )}
-      />
-    </View>
+        </View>
+        <View className="flex-row items-center bg-[#F2F5F9] rounded-xl px-4 py-2.5">
+          <MaterialIcons name="search" size={20} color="#6D7A70" />
+          <TextInput
+            className="flex-1 ml-2 text-sm text-[#111] p-0"
+            placeholder="Buscar conversas..."
+            placeholderTextColor="#A0AAB2"
+          />
+        </View>
+      </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <View className="flex-row px-5 py-4 gap-x-3">
+          <TouchableOpacity className="flex-1 bg-[#111] py-2.5 rounded-full items-center shadow-sm">
+            <Text className="text-white text-xs font-bold">Todas</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-1 bg-white py-2.5 rounded-full items-center border border-[#E8EEF5] shadow-sm">
+            <Text className="text-[#6D7A70] text-xs font-bold">Comprando</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-1 bg-white py-2.5 rounded-full items-center border border-[#E8EEF5] shadow-sm">
+            <Text className="text-[#6D7A70] text-xs font-bold">Vendendo</Text>
+          </TouchableOpacity>
+        </View>
+        <View className="bg-white rounded-t-3xl overflow-hidden mt-2 pt-2 shadow-sm elevation-1 min-h-[500px]">
+          {conversas.map((conversa) => (
+            <ConversaCard
+              key={conversa.id}
+              nome={conversa.nome}
+              produto={conversa.produto}
+              ultimaMensagem={conversa.ultimaMensagem}
+              tempo={conversa.tempo}
+              naoLida={conversa.naoLida}
+              onPress={() =>
+                router.push({
+                  pathname: "/mensagem/[id]",
+                  params: {
+                    id: conversa.id,
+                    nome: conversa.nome,
+                  },
+                })
+              }
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: "#f9f9f9",
-  },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  chatCard: {
-    padding: 15,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  chatHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  chatName: { fontWeight: "bold", fontSize: 16 },
-  chatTime: { fontSize: 12, color: "#888" },
-  chatText: { color: "#555" },
-});

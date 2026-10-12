@@ -4,7 +4,13 @@ export interface Usuario {
   senha: string;
 }
 
-const USUARIOS: Usuario[] = [];
+const USUARIOS: Usuario[] = [
+  {
+    nome: "Conta de Teste",
+    email: "teste@app.com",
+    senha: "123456",
+  },
+];
 
 export function emailValido(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());

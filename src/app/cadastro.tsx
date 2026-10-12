@@ -1,13 +1,17 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Button,
-  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Botao } from "../components/Botao";
+import { CabecalhoAuth } from "../components/CabecalhoAuth";
+import { Input } from "../components/Input";
 import { cadastrarUsuario } from "../lib/auth-store";
 
 export default function Cadastro() {
@@ -18,101 +22,109 @@ export default function Cadastro() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
-  function handleCadastrar() {
+  function lidarComCadastro() {
     setErro("");
     setSucesso("");
-
-    if (senha !== confirmarSenha) {
-      setErro("As senhas não coincidem.");
-      return;
-    }
-
+    if (senha !== confirmarSenha) return setErro("As senhas não coincidem.");
     try {
       cadastrarUsuario({ nome, email, senha });
-      setSucesso("Cadastro realizado! Redirecionando para o login...");
-
-      setTimeout(() => {
-        router.replace("/");
-      }, 1200);
+      setSucesso("Cadastro realizado! Redirecionando...");
+      setTimeout(() => router.replace("/"), 1200);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível cadastrar.");
     }
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nome"
-        value={nome}
-        onChangeText={setNome}
-        autoCapitalize="words"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha (mín. 6 caracteres)"
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirmar senha"
-        value={confirmarSenha}
-        onChangeText={setConfirmarSenha}
-        secureTextEntry
-      />
-
-      {erro ? <Text style={styles.erro}>{erro}</Text> : null}
-      {sucesso ? <Text style={styles.sucesso}>{sucesso}</Text> : null}
-
-      <Button title="Cadastrar" onPress={handleCadastrar} />
-
-      <TouchableOpacity onPress={() => router.replace("/")}>
-        <Text style={styles.link}>Já tem conta? Entrar</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView className="flex-1 bg-[#F7F8FC]">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          className="flex-1 bg-[#F7F8FC]"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 20,
+            paddingTop: 32,
+            paddingBottom: 32,
+            alignItems: "center",
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <CabecalhoAuth
+            icone="person-add-alt-1"
+            titulo="Criar Conta"
+            subtitulo={
+              "Junte-se à nossa comunidade e comece\na comprar e vender hoje mesmo."
+            }
+          />
+          <View className="w-full bg-white rounded-2xl p-6 shadow-sm elevation-2">
+            <Text className="text-xs font-bold text-[#555] mb-2">
+              Nome completo
+            </Text>
+            <Input
+              icone="person-outline"
+              placeholder="Seu nome"
+              value={nome}
+              onChangeText={setNome}
+              autoCapitalize="words"
+            />
+            <Text className="text-xs font-bold text-[#555] mb-2 -mt-1">
+              E-mail
+            </Text>
+            <Input
+              icone="mail-outline"
+              placeholder="seuemail@exemplo.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <Text className="text-xs font-bold text-[#555] mb-2 -mt-1">
+              Senha (mín. 6 caracteres)
+            </Text>
+            <Input
+              icone="lock-outline"
+              placeholder="Crie uma senha forte"
+              value={senha}
+              onChangeText={setSenha}
+              ehSenha
+            />
+            <Text className="text-xs font-bold text-[#555] mb-2 -mt-1">
+              Confirmar senha
+            </Text>
+            <Input
+              icone="lock-outline"
+              placeholder="Repita sua senha"
+              value={confirmarSenha}
+              onChangeText={setConfirmarSenha}
+              ehSenha
+            />
+            {erro ? (
+              <Text className="text-[#D32F2F] text-xs text-center mb-4 font-bold">
+                {erro}
+              </Text>
+            ) : null}
+            {sucesso ? (
+              <Text className="text-[#00995D] text-[13px] text-center mb-4 font-bold">
+                {sucesso}
+              </Text>
+            ) : null}
+            <Botao
+              titulo="Cadastrar"
+              icone="check"
+              onPress={lidarComCadastro}
+            />
+          </View>
+          <View className="flex-row mt-8 items-center justify-center">
+            <Text className="text-sm text-[#666]">Já tem conta? </Text>
+            <TouchableOpacity onPress={() => router.replace("/")}>
+              <Text className="text-sm font-bold text-[#008B74]">Entrar</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-  },
-  erro: {
-    color: "#cc0000",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  sucesso: {
-    color: "#0a8a0a",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  link: {
-    color: "#007BFF",
-    textAlign: "center",
-    marginTop: 15,
-  },
-});
