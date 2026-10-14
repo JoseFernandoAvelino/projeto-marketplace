@@ -22,7 +22,7 @@ class Login(BaseModel):
 @router.post("/usuarios", status_code=201)
 def cadastrar(dados: NovoUsuario):
     """Cadastro de um novo usuário."""
-    cpf = "".join(c for c in dados.cpf if c.isdigit())  # tira pontos e traço
+    cpf = "".join(c for c in dados.cpf if c.isdigit()) 
 
     if not dados.nome.strip() or "@" not in dados.email:
         raise HTTPException(400, "Informe o nome e um e-mail válido.")
