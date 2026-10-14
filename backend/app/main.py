@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from app.routes import usuarios
 from app.routes import produtos
 from app.routes import uploads
+from app.routes import conversas
 
 app = FastAPI(
     title="API do Marketplace",
@@ -25,6 +26,7 @@ def inicio():
 app.include_router(usuarios.router)
 app.include_router(produtos.router)
 app.include_router(uploads.router)
+app.include_router(conversas.router)
 
 os.makedirs(uploads.PASTA_UPLOADS, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads.PASTA_UPLOADS), name="fotos")
