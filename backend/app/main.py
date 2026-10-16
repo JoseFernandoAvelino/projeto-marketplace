@@ -8,12 +8,12 @@ from app.routes import usuarios
 from app.routes import produtos
 from app.routes import uploads
 from app.routes import conversas
+from app.routes import propostas
 
 app = FastAPI(
     title="API do Marketplace",
     description="Backend do App Marketplace: usuários, produtos, chat e propostas.",
 )
-
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -27,6 +27,7 @@ app.include_router(usuarios.router)
 app.include_router(produtos.router)
 app.include_router(uploads.router)
 app.include_router(conversas.router)
+app.include_router(propostas.router)
 
 os.makedirs(uploads.PASTA_UPLOADS, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads.PASTA_UPLOADS), name="fotos")
