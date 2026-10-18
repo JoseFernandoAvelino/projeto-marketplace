@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-const ENDERECO_FIXO = "192.168.1.5";
+const ENDERECO_FIXO = "";
 
 function descobrirEndereco() {
   if (ENDERECO_FIXO) return ENDERECO_FIXO;
