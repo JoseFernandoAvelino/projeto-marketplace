@@ -1,13 +1,37 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AnuncioPerfilCard } from "../../components/AnuncioPerfilCard";
 import { Botao } from "../../components/Botao";
 import { ConfiguracaoItem } from "../../components/ConfiguracaoItem";
 import { EstatisticaPerfil } from "../../components/EstatisticaPerfil";
+import { api } from "../../lib/api";
+import { formatarPreco, Produto } from "../../lib/produtos";
+import { sair, usuarioAtual } from "../../lib/sessao";
 
 export default function Perfil() {
+  const usuario = usuarioAtual();
+  const [anuncios, setAnuncios] = useState<Produto[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!usuario) return;
+      setCarregando(true);
+      api<Produto[]>(`/produtos?vendedor_id=${usuario.id}`)
+        .then(setAnuncios)
+        .catch(() => setAnuncios([]))
+        .finally(() => setCarregando(false));
+    }, [usuario?.id])
+  );
+
+  function sairDaConta() {
+    sair();
+    router.replace("/");
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
       <View className="flex-row justify-between items-center px-5 pt-2 pb-4 bg-[#F7F8FC]">
@@ -48,7 +72,9 @@ export default function Perfil() {
             </View>
           </View>
           <View className="flex-row items-center mt-3">
-            <Text className="text-xl font-black text-[#111]">Vendedor 1</Text>
+            <Text className="text-xl font-black text-[#111]">
+              {usuario?.nome ?? "Visitante"}
+            </Text>
             <View className="flex-row items-center bg-[#EAF3EE] px-2 py-0.5 rounded-full ml-2">
               <MaterialIcons name="security" size={10} color="#00995D" />
               <Text className="text-[9px] font-bold text-[#00995D] ml-1">
@@ -59,7 +85,7 @@ export default function Perfil() {
           <View className="flex-row items-center mt-1">
             <MaterialIcons name="calendar-today" size={10} color="#6D7A70" />
             <Text className="text-[11px] text-[#6D7A70] ml-1">
-              Membro desde Outubro de 2025 • Surubim, PE
+              {usuario?.email ?? "Faça login para ver seus anúncios"}
             </Text>
           </View>
         </View>
@@ -95,7 +121,9 @@ export default function Perfil() {
                 Meus Anúncios
               </Text>
               <View className="bg-[#E8EEF5] px-2 py-0.5 rounded-full ml-2">
-                <Text className="text-[10px] font-bold text-[#0051D5]">5</Text>
+                <Text className="text-[10px] font-bold text-[#0051D5]">
+                  {anuncios.length}
+                </Text>
               </View>
             </View>
             <TouchableOpacity className="flex-row items-center">
@@ -108,28 +136,39 @@ export default function Perfil() {
           <View className="flex-row bg-[#F2F5F9] rounded-full p-1 mb-4">
             <TouchableOpacity className="flex-1 bg-white py-2 rounded-full items-center shadow-sm">
               <Text className="text-[11px] font-bold text-[#111]">
-                Ativos (2)
+                Ativos ({anuncios.length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity className="flex-1 py-2 rounded-full items-center">
-              <Text className="text-[11px] text-[#6D7A70]">Vendidos (10)</Text>
+              <Text className="text-[11px] text-[#6D7A70]">Vendidos (0)</Text>
             </TouchableOpacity>
             <TouchableOpacity className="flex-1 py-2 rounded-full items-center">
               <Text className="text-[11px] text-[#6D7A70]">Pausados (0)</Text>
             </TouchableOpacity>
           </View>
-          <AnuncioPerfilCard
-            titulo="Produto 1"
-            preco="R$ 700"
-            local="Surubim"
-            visualizacoes={120}
-          />
-          <AnuncioPerfilCard
-            titulo="Produto 2"
-            preco="R$ 300"
-            local="Surubim"
-            visualizacoes={90}
-          />
+          {carregando && usuario ? (
+            <ActivityIndicator color="#006D43" style={{ marginVertical: 24 }} />
+          ) : anuncios.length === 0 ? (
+            <Text className="text-xs text-[#6D7A70] text-center my-6">
+              Você ainda não tem anúncios publicados.
+            </Text>
+          ) : (
+            anuncios.map((anuncio) => (
+              <AnuncioPerfilCard
+                key={anuncio.id}
+                titulo={anuncio.titulo}
+                preco={formatarPreco(anuncio.preco)}
+                local={anuncio.localizacao}
+                imagem={anuncio.imagens[0]}
+                onPress={() =>
+                  router.push({ pathname: "/produto/[id]", params: { id: String(anuncio.id) } })
+                }
+                onEditar={() =>
+                  router.push({ pathname: "/editar/[id]", params: { id: String(anuncio.id) } })
+                }
+              />
+            ))
+          )}
         </View>
         <View className="px-5 mt-4 mb-8">
           <Text className="text-lg font-bold text-[#111] mb-2">
@@ -165,7 +204,7 @@ export default function Perfil() {
         </View>
         <TouchableOpacity
           className="flex-row items-center justify-center mx-5 py-4 bg-white rounded-2xl border border-[#F2F5F9] shadow-sm elevation-1"
-          onPress={() => router.replace("/")}
+          onPress={sairDaConta}
         >
           <MaterialIcons name="logout" size={20} color="#D32F2F" />
           <Text className="text-sm font-bold text-[#D32F2F] ml-2">

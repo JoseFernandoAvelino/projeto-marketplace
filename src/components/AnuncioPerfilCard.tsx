@@ -1,24 +1,34 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface AnuncioPerfilCardProps {
   titulo: string;
   preco: string;
   local: string;
-  visualizacoes: number;
+  visualizacoes?: number;
+  imagem?: string;
+  onPress?: () => void;
+  onEditar?: () => void;
 }
 
 export function AnuncioPerfilCard({
   titulo,
   preco,
   local,
-  visualizacoes,
+  visualizacoes = 0,
+  imagem,
+  onPress,
+  onEditar,
 }: AnuncioPerfilCardProps) {
   return (
     <View className="bg-white rounded-2xl mb-4 border border-[#F2F5F9] shadow-sm elevation-1 overflow-hidden">
-      <View className="flex-row p-3">
-        <View className="w-20 h-20 bg-[#E8EEF5] rounded-xl items-center justify-center">
-          <MaterialIcons name="image" size={28} color="#A0AAB2" />
+      <TouchableOpacity className="flex-row p-3" onPress={onPress} activeOpacity={0.8}>
+        <View className="w-20 h-20 bg-[#E8EEF5] rounded-xl items-center justify-center overflow-hidden">
+          {imagem ? (
+            <Image source={{ uri: imagem }} className="w-full h-full" resizeMode="cover" />
+          ) : (
+            <MaterialIcons name="image" size={28} color="#A0AAB2" />
+          )}
         </View>
         <View className="flex-1 ml-3 justify-between py-1">
           <View className="flex-row justify-between items-start">
@@ -43,9 +53,12 @@ export function AnuncioPerfilCard({
             <Text className="text-[10px] text-[#6D7A70]">{local}</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
       <View className="flex-row border-t border-[#F2F5F9] px-2 py-2">
-        <TouchableOpacity className="flex-1 flex-row items-center justify-center py-1">
+        <TouchableOpacity
+          className="flex-1 flex-row items-center justify-center py-1"
+          onPress={onEditar}
+        >
           <MaterialIcons name="edit" size={14} color="#0051D5" />
           <Text className="text-xs font-bold text-[#0051D5] ml-1">Editar</Text>
         </TouchableOpacity>
