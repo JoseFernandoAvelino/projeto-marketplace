@@ -12,21 +12,30 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Botao } from "../components/Botao";
 import { CabecalhoAuth } from "../components/CabecalhoAuth";
 import { Input } from "../components/Input";
-import { validarLogin } from "../lib/auth-store";
+import { api } from "../lib/api";
+import { entrar, Usuario } from "../lib/sessao";
 
 export default function Login() {
   const [email, setEmail] = useState("teste@app.com");
   const [senha, setSenha] = useState("123456");
   const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function lidarComEntrada() {
+  async function lidarComEntrada() {
     setErro("");
     if (!email.trim() || !senha) return setErro("Preencha e-mail e senha.");
+    setCarregando(true);
     try {
-      validarLogin(email, senha);
+      const usuario = await api<Usuario>("/login", {
+        metodo: "POST",
+        corpo: { email: email.trim(), senha },
+      });
+      entrar(usuario);
       router.replace("/(tabs)/home");
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível entrar.");
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -86,9 +95,10 @@ export default function Login() {
               </Text>
             ) : null}
             <Botao
-              titulo="Entrar"
+              titulo={carregando ? "Entrando..." : "Entrar"}
               icone="arrow-forward"
               onPress={lidarComEntrada}
+              disabled={carregando}
             />
           </View>
           <View className="flex-row mt-8 items-center justify-center">
