@@ -1,7 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
-export function VendedorCard() {
+interface VendedorCardProps {
+  nome?: string;
+}
+
+export function VendedorCard({ nome = "Vendedor" }: VendedorCardProps) {
   return (
     <View className="bg-white rounded-2xl mx-5 mt-4 p-4 shadow-sm elevation-1">
       <View className="flex-row justify-between items-center mb-4">
@@ -26,7 +30,7 @@ export function VendedorCard() {
           </View>
         </View>
         <View className="ml-3">
-          <Text className="text-base font-bold text-[#111]">Vendedor 1</Text>
+          <Text className="text-base font-bold text-[#111]">{nome}</Text>
           <View className="flex-row items-center">
             <MaterialIcons name="star" size={14} color="#F59E0B" />
             <Text className="text-xs font-bold text-[#111] ml-1">4.9</Text>

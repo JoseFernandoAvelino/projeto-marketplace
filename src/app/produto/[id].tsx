@@ -1,17 +1,61 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { BarraAcaoProduto } from "../../components/BarraAcaoProduto";
+import { Botao } from "../../components/Botao";
 import { CabecalhoTela } from "../../components/CabecalhoTela";
 import { VendedorCard } from "../../components/VendedorCard";
+import { api } from "../../lib/api";
+import { formatarPreco, Produto, tempoDesde } from "../../lib/produtos";
+import { usuarioAtual } from "../../lib/sessao";
 
 export default function DetalhesProduto() {
-  const { id, titulo, preco, tag, local, tempo, imagem } =
-    useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
+  const [produto, setProduto] = useState<Produto | null>(null);
+  const [erro, setErro] = useState("");
 
-  const urlImagem =
-    typeof imagem === "string" ? imagem : "https://via.placeholder.com/800";
+  useFocusEffect(
+    useCallback(() => {
+      setErro("");
+      api<Produto>(`/produtos/${id}`)
+        .then(setProduto)
+        .catch((e) => setErro(e instanceof Error ? e.message : "Erro ao carregar o produto."));
+    }, [id])
+  );
+
+  if (erro || !produto) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
+        <CabecalhoTela titulo="Detalhes Do Produto" />
+        <View className="flex-1 items-center justify-center px-8">
+          {erro ? (
+            <>
+              <MaterialIcons name="error-outline" size={40} color="#A0AAB2" />
+              <Text className="text-sm text-[#6D7A70] text-center mt-2">{erro}</Text>
+            </>
+          ) : (
+            <ActivityIndicator size="large" color="#006D43" />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const ehDono = usuarioAtual()?.id === produto.vendedor_id;
+  const imagem = produto.imagens[0];
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
@@ -20,35 +64,47 @@ export default function DetalhesProduto() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View className="w-full h-80 bg-[#E8EEF5] relative">
-          <Image
-            source={{ uri: urlImagem }}
-            className="w-full h-full"
-            resizeMode="cover"
-          />
+        <View className="w-full h-80 bg-[#E8EEF5] relative items-center justify-center">
+          {imagem ? (
+            <Image
+              source={{ uri: imagem }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <MaterialIcons name="image" size={64} color="#A0AAB2" />
+          )}
           <TouchableOpacity className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm">
             <MaterialIcons name="favorite-border" size={20} color="#555" />
           </TouchableOpacity>
-          <View className="absolute bottom-4 right-4 bg-black/60 px-3 py-1 rounded-full flex-row items-center">
-            <MaterialIcons name="photo-library" size={12} color="#FFF" />
-            <Text className="text-white text-xs font-bold ml-1">1/4</Text>
-          </View>
+          {produto.imagens.length > 0 && (
+            <View className="absolute bottom-4 right-4 bg-black/60 px-3 py-1 rounded-full flex-row items-center">
+              <MaterialIcons name="photo-library" size={12} color="#FFF" />
+              <Text className="text-white text-xs font-bold ml-1">
+                1/{produto.imagens.length}
+              </Text>
+            </View>
+          )}
         </View>
         <View className="bg-white rounded-b-3xl px-5 pt-5 pb-6 shadow-sm elevation-1">
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center bg-[#F2F5F9] px-2 py-1 rounded-md">
               <MaterialIcons name="verified" size={14} color="#0051D5" />
               <Text className="text-[11px] font-bold text-[#0051D5] ml-1">
-                {tag}
+                {produto.condicao}
               </Text>
             </View>
-            <Text className="text-[11px] text-[#6D7A70]">{tempo}</Text>
+            <Text className="text-[11px] text-[#6D7A70]">
+              {tempoDesde(produto.criado_em)}
+            </Text>
           </View>
           <Text className="text-xl font-black text-[#111] mb-2 leading-tight">
-            {titulo}
+            {produto.titulo}
           </Text>
           <View className="flex-row items-end mb-4">
-            <Text className="text-3xl font-black text-[#006D43]">{preco}</Text>
+            <Text className="text-3xl font-black text-[#006D43]">
+              {formatarPreco(produto.preco)}
+            </Text>
           </View>
           <View className="flex-row items-center justify-between border-t border-[#F2F5F9] pt-4">
             <View className="flex-row items-center flex-1">
@@ -57,27 +113,33 @@ export default function DetalhesProduto() {
                 className="text-[11px] text-[#6D7A70] ml-1"
                 numberOfLines={1}
               >
-                {local}
+                {produto.localizacao || "Local não informado"}
               </Text>
             </View>
             <View className="flex-row items-center flex-1 justify-end">
               <MaterialIcons name="local-shipping" size={18} color="#00995D" />
               <Text className="text-[11px] text-[#6D7A70] ml-1 text-right">
-                Entrega em mãos
+                {produto.faz_entrega ? "Faz entrega" : "Entrega em mãos"}
               </Text>
             </View>
           </View>
         </View>
-        <VendedorCard />
+        <VendedorCard nome={produto.vendedor_nome} />
         <View className="bg-white rounded-2xl mx-5 mt-4 p-5 shadow-sm elevation-1">
           <Text className="text-base font-bold text-[#111] mb-2">
             Descrição
           </Text>
           <Text className="text-[13px] text-[#555] leading-relaxed">
-            Detalhes do produto...{"\n"}
-            Detalhes do produto...{"\n"}
-            Detalhes do produto...
+            {produto.descricao || "O vendedor não adicionou uma descrição."}
           </Text>
+          <View className="flex-row flex-wrap mt-3">
+            {produto.aceita_proposta && (
+              <Text className="text-[11px] font-bold text-[#00995D] mr-4">✓ Aceita propostas</Text>
+            )}
+            {produto.aceita_troca && (
+              <Text className="text-[11px] font-bold text-[#00995D]">✓ Aceita trocas</Text>
+            )}
+          </View>
         </View>
         <View className="bg-white rounded-2xl mx-5 mt-4 p-5 shadow-sm elevation-1">
           <View className="flex-row justify-between items-center mb-4">
@@ -89,7 +151,7 @@ export default function DetalhesProduto() {
             <View className="bg-white flex-row items-center px-3 py-2 rounded-lg shadow-sm elevation-2">
               <MaterialIcons name="near-me" size={16} color="#006D43" />
               <Text className="text-[12px] font-bold text-[#111] ml-2">
-                Ponto Central (~500m)
+                {produto.localizacao || "Ponto Central (~500m)"}
               </Text>
             </View>
           </View>
@@ -99,7 +161,23 @@ export default function DetalhesProduto() {
           </Text>
         </View>
       </ScrollView>
-      <BarraAcaoProduto />
+      {ehDono ? (
+        <View
+          className="absolute bottom-0 w-full bg-white border-t border-[#F2F5F9] px-5 pt-3"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        >
+          <Botao
+            titulo="Editar anúncio"
+            icone="edit"
+            onPress={() =>
+              router.push({ pathname: "/editar/[id]", params: { id: String(produto.id) } })
+            }
+            style={{ marginTop: 0 }}
+          />
+        </View>
+      ) : (
+        <BarraAcaoProduto />
+      )}
     </SafeAreaView>
   );
 }

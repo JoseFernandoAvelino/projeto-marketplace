@@ -1,10 +1,13 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarraBusca } from "../../components/BarraBusca";
 import { CategoriaQuadrado } from "../../components/CategoriaQuadrado";
 import { FiltroChip } from "../../components/FiltroChip";
+import { ListaProdutos } from "../../components/ListaProdutos";
+import { api } from "../../lib/api";
+import { CATEGORIAS, Produto } from "../../lib/produtos";
 
 export default function Explorar() {
   const [localAtivo, setLocalAtivo] = useState(true);
@@ -12,16 +15,36 @@ export default function Explorar() {
   const [condicaoAtiva, setCondicaoAtiva] = useState(false);
   const [entregaAtiva, setEntregaAtiva] = useState(false);
   const [trocaAtiva, setTrocaAtiva] = useState(false);
-  const categorias = [
-    { titulo: "Eletrônicos & Tech", icone: "smartphone" as const },
-    { titulo: "Móveis & Casa", icone: "chair" as const },
-    { titulo: "Moda & Acesso.", icone: "checkroom" as const },
-    { titulo: "Veículos", icone: "directions-car" as const },
-    { titulo: "Esportes & Lazer", icone: "pedal-bike" as const },
-    { titulo: "Livros & Jogos", icone: "menu-book" as const },
-    { titulo: "Brinquedos", icone: "smart-toy" as const },
-    { titulo: "Outros", icone: "more-horiz" as const },
-  ];
+  const params = useLocalSearchParams<{ busca?: string }>();
+  const [busca, setBusca] = useState(params.busca ?? "");
+  const [categoria, setCategoria] = useState("");
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
+  async function buscarProdutos(termo: string, cat: string) {
+    setCarregando(true);
+    setErro("");
+    try {
+      const filtros = new URLSearchParams();
+      if (termo.trim()) filtros.append("busca", termo.trim());
+      if (cat) filtros.append("categoria", cat);
+      setProdutos(await api<Produto[]>(`/produtos?${filtros.toString()}`));
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao buscar os produtos.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    if (params.busca !== undefined) setBusca(params.busca);
+  }, [params.busca]);
+  
+  useEffect(() => {
+    const espera = setTimeout(() => buscarProdutos(busca, categoria), 400);
+    return () => clearTimeout(espera);
+  }, [busca, categoria]);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
@@ -29,7 +52,7 @@ export default function Explorar() {
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-2xl font-black text-[#111]">Explorar</Text>
         </View>
-        <BarraBusca />
+        <BarraBusca value={busca} onChangeText={setBusca} />
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -78,24 +101,27 @@ export default function Explorar() {
             Filtrar por categorias
           </Text>
           <View className="flex-row flex-wrap justify-between">
-            {categorias.map((cat, idx) => (
+            {CATEGORIAS.map((cat) => (
               <CategoriaQuadrado
-                key={idx}
-                titulo={cat.titulo}
+                key={cat.id}
+                titulo={cat.nome}
                 icone={cat.icone}
-                onPress={() => {}}
+                selecionado={categoria === cat.id}
+                onPress={() => setCategoria(categoria === cat.id ? "" : cat.id)}
               />
             ))}
           </View>
         </View>
-        <View className="px-5 mt-6 items-center justify-center min-h-[150px]">
-          <MaterialIcons name="search-off" size={48} color="#A0AAB2" />
-          <Text className="text-sm font-bold text-[#6D7A70] mt-2 text-center">
-            Nenhum produto encontrado
+        <View className="px-5 mt-2">
+          <Text className="text-sm font-black text-[#111] mb-4 uppercase tracking-wider">
+            {busca.trim() || categoria ? "Resultados" : "Todos os produtos"}
           </Text>
-          <Text className="text-xs text-[#A0AAB2] mt-1 text-center">
-            Tente ajustar os filtros ou pesquisar outro termo.
-          </Text>
+          <ListaProdutos
+            produtos={produtos}
+            carregando={carregando}
+            erro={erro}
+            onTentarDeNovo={() => buscarProdutos(busca, categoria)}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

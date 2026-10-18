@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface ProdutoCardProps {
-  imagem: string;
+  imagem?: string;
   tag: string;
   tagCor: string;
   preco: string;
@@ -28,12 +28,16 @@ export function ProdutoCard({
       className="w-[48%] bg-white rounded-2xl mb-4 shadow-sm elevation-1 overflow-hidden"
       activeOpacity={0.8}
     >
-      <View className="relative w-full h-36 bg-[#F2F5F9]">
-        <Image
-          source={{ uri: imagem }}
-          className="w-full h-full"
-          resizeMode="cover"
-        />
+      <View className="relative w-full h-36 bg-[#F2F5F9] items-center justify-center">
+        {imagem ? (
+          <Image
+            source={{ uri: imagem }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
+        ) : (
+          <MaterialIcons name="image" size={40} color="#A0AAB2" />
+        )}
         <View
           className={`absolute top-2 left-2 px-2 py-1 rounded-md ${tagCor}`}
         >
