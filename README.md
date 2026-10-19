@@ -1,22 +1,21 @@
-# Marketplace App
+# App Marketplace
 
-Aplicativo mobile de **marketplace** desenvolvido com [Expo](https://expo.dev) e React Native, onde qualquer usuário pode **comprar** ou **vender** produtos: novos, seminovos ou usados em bom estado.
+Aplicativo mobile de **marketplace** desenvolvido com [Expo](https://expo.dev), React Native e um back-end em Python (FastAPI). No app, qualquer usuário pode **comprar** ou **vender** produtos: novos, seminovos ou usados em bom estado.
 
 ---
 
 ## Sobre o projeto
 
-Este app funciona como uma vitrine digital: qualquer pessoa cadastrada pode anunciar itens à venda ou navegar para comprar produtos anunciados por outros usuários.
+Este app funciona como uma vitrine digital completa e conectada a um banco de dados real. Qualquer pessoa cadastrada pode anunciar itens à venda, enviar fotos diretamente do celular, e navegar para comprar produtos anunciados por outros usuários.
 
 ### Funcionalidades principais
 
-- **Cadastro de usuários**, com Nome, E-mail e Senha — qualquer usuário pode tanto comprar quanto anunciar produtos.
-- **Login** com validação de e-mail e senha.
-- **Vitrine de produtos** (aba _Home_), com nome, preço e condição do item.
-- **Anunciar produto** (aba _Anunciar_), para o usuário colocar seus próprios itens à venda.
-- **Mensagens** (aba _Mensagens_), para conversar sobre negociações.
-- **Perfil** (aba _Perfil_), com os dados do usuário logado.
-- **Detalhes do produto**, com uma tela dedicada para cada anúncio.
+- **Cadastro e Login de usuários**, integrado ao banco de dados PostgreSQL com segurança.
+- **Vitrine de produtos** (abas _Início_ / _Explorar_), listando os itens mais recentes da comunidade com preços e condições.
+- **Anunciar, Editar e Excluir produtos**, permitindo que o usuário tire fotos na hora ou escolha da galeria, gerenciando seus próprios anúncios de forma nativa.
+- **Carrossel de Imagens**, com navegação fluida em anúncios com múltiplas fotos.
+- **Mensagens**, para conversar sobre negociações e enviar propostas.
+- **Perfil**, com os dados do usuário e acesso rápido à edição dos seus anúncios ativos.
 
 ---
 
@@ -29,106 +28,114 @@ O design das interfaces e o protótipo navegável foram desenvolvidos no Figma.
 
 ---
 
-## Documentação
+## Documentação e Diagramas
 
-Abaixo se encontra o Diagrama de Casos de Uso, que ilustra as principais interações dos utilizadores com as funcionalidades do sistema:
+Abaixo estão os diagramas que ilustram a arquitetura e as principais interações do sistema:
 
-![Diagrama de Casos de Uso](/docs/diagrama_de_casos_uso.jpeg)
+**1. Diagrama de Casos de Uso**  
+_(Ilustra as principais interações dos utilizadores com as funcionalidades do sistema)_  
+![Diagrama de Casos de Uso](/docs/DiagramaCasosDeUsoMarketplace2.png)
+
+**2. Diagrama de Classes**  
+_(Ilustra as principois classes do sistema)_  
+![Nome do Diagrama 2](/docs/DiagramaDeClasses.png)
 
 ---
 
 ## Estrutura do projeto
 
-```
+O projeto evoluiu para uma aplicação **Full-Stack**, estruturada da seguinte forma:
+
+```text
 projeto-marketplace/
-├── src/
-│   ├── app/                  # Telas do app
-│   │   ├── index.tsx         # Tela de Login
-│   │   ├── cadastro.tsx      # Tela de Cadastro
-│   │   ├── produto/[id].tsx  # Detalhes de um produto
-│   │   └── (tabs)/           # Navegação em abas
-│   │       ├── home.tsx      # Vitrine de produtos
-│   │       ├── anunciar.tsx  # Anunciar um novo produto
-│   │       ├── mensagens.tsx # Mensagens/conversas
-│   │       └── perfil.tsx    # Perfil do usuário
-│   ├── components/           # Componentes reutilizáveis de UI
-│   ├── constants/            # Cores, temas e valores fixos
-│   ├── hooks/                 # Hooks customizados
-│   └── lib/
-│       └── auth-store.ts     # Lógica de cadastro/login (validações e "banco" em memória)
-├── assets/                   # Imagens e ícones
-├── app.json                  # Configurações do Expo
-└── package.json              # Dependências e scripts do projeto
+├── backend/                  # Servidor, API e Banco de Dados (Python)
+│   ├── app/                  # Rotas (produtos.py, etc), db.py e main.py
+│   ├── uploads/              # Imagens dos anúncios salvas localmente
+│   └── venv/                 # Ambiente virtual do Python
+│
+├── src/                      # Front-end Mobile (Expo/React Native)
+│   ├── app/                  # Telas do app (Início, Anunciar, Editar, Produto Detalhes)
+│   ├── components/           # Componentes reutilizáveis (CabeçalhoAba, Botões, Cards)
+│   └── lib/                  # Lógica de conexão (api.ts com IP dinâmico)
+├── assets/                   # Imagens e ícones estáticos do app
+└── package.json              # Dependências JavaScript
 ```
 
 ---
 
 ## Como importar e rodar o projeto
 
-Siga os passos abaixo para baixar o projeto do GitHub e rodá-lo na sua máquina.
+Como o projeto agora possui servidor e banco de dados, você precisará rodar o back-end e o front-end simultaneamente.
 
 ### Pré-requisitos
 
-Antes de começar, você precisa ter instalado:
-
-| Ferramenta               | Para que serve                          | Link                          |
-| ------------------------ | --------------------------------------- | ----------------------------- |
-| **Node.js** (LTS)        | Rodar o `npm` e o JavaScript do projeto | https://nodejs.org            |
-| **Git**                  | Baixar (clonar) o projeto do GitHub     | https://git-scm.com/downloads |
-| **Expo Go** (no celular) | Testar o app no seu celular físico      | Play Store / App Store        |
-
-Para conferir se Node e Git já estão instalados, rode no terminal:
-
-```bash
-node -v
-git --version
-```
+| Ferramenta        | Para que serve                                       |
+| ----------------- | ---------------------------------------------------- |
+| **Node.js** (LTS) | Rodar o `npm` e iniciar o aplicativo Expo            |
+| **Python** (3.8+) | Rodar o servidor FastAPI do back-end                 |
+| **PostgreSQL**    | Banco de dados onde anúncios e usuários ficam salvos |
+| **Git**           | Baixar o projeto do repositório                      |
+| **Expo Go**       | Testar o app diretamente no seu celular físico       |
 
 ### 1. Clonar o repositório
 
-Abra o terminal na pasta onde deseja salvar o projeto e rode:
+Abra o terminal e rode:
 
 ```bash
 git clone https://github.com/JoseFernandoAvelino/projeto-marketplace.git
-```
-
-Depois, entre na pasta criada:
-
-```bash
 cd projeto-marketplace
 ```
 
-### 2. Instalar as dependências
+### 2. Iniciar o Back-end (Servidor)
+
+Abra um terminal, entre na pasta do back-end e ative o ambiente virtual:
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate  # No Windows
+# source venv/bin/activate # No Mac/Linux
+```
+
+Instale as dependências e inicie o servidor:
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 3333
+```
+
+### 3. Iniciar o Front-end (Aplicativo)
+
+Abra um **novo terminal** (mantenha o terminal do servidor aberto e rodando), volte para a pasta raiz do projeto e instale as bibliotecas mobile:
 
 ```bash
 npm install
 ```
 
-Esse comando baixa todas as bibliotecas que o projeto usa (React, Expo, etc.) e cria a pasta `node_modules`. Pode levar alguns minutos.
-
-### 3. Iniciar o aplicativo
+Inicie o aplicativo:
 
 ```bash
 npx expo start
 ```
 
-Isso abre o **Metro Bundler**, com um QR code no terminal e algumas opções de execução.
-
-### 4. Abrir o app
-
-Com o servidor rodando, você pode visualizar o app de várias formas:
-
-- **Celular (recomendado):** abra o app **Expo Go** e escaneie o QR code exibido no terminal. O celular precisa estar na mesma rede Wi-Fi do computador.
-- **Emulador Android:** pressione `a` (requer Android Studio configurado).
+- **No celular (recomendado):** abra o app **Expo Go**, escaneie o QR code exibido no terminal. O seu celular e o computador precisam estar obrigatoriamente na **mesma rede Wi-Fi** para que as imagens e os produtos carreguem.
 
 ---
 
 ## Tecnologias utilizadas
 
-- [Expo](https://expo.dev)
-- [Expo Router](https://docs.expo.dev/router/introduction/)
+**Front-end (Mobile):**
+
+- [Expo](https://expo.dev) e [Expo Router](https://docs.expo.dev/router/introduction/)
 - [React Native](https://reactnative.dev)
+- [Tailwind CSS (NativeWind)](https://www.nativewind.dev/)
 - [TypeScript](https://www.typescriptlang.org)
+
+**Back-end:**
+
+- [Python](https://www.python.org/) e [FastAPI](https://fastapi.tiangolo.com/)
+- [PostgreSQL](https://www.postgresql.org/) + `psycopg` (Banco de dados relacional)
+- [Uvicorn](https://www.uvicorn.org/)
 
 ---
 
