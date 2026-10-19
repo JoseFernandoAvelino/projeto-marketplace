@@ -1,18 +1,18 @@
 # App Marketplace
 
-Aplicativo mobile de **marketplace** desenvolvido com [Expo](https://expo.dev), React Native e um back-end em Python (FastAPI). No app, qualquer usuário pode **comprar** ou **vender** produtos: novos, seminovos ou usados em bom estado.
+Aplicativo mobile de **marketplace** desenvolvido com [Expo](https://expo.dev), React Native e um back-end em Python (FastAPI). No app, qualquer usuário pode **comprar** ou **vender** produtos: novos, em bom estado ou usados.
 
 ---
 
 ## Sobre o projeto
 
-Este app funciona como uma vitrine digital completa e conectada a um banco de dados real. Qualquer pessoa cadastrada pode anunciar itens à venda, enviar fotos diretamente do celular, e navegar para comprar produtos anunciados por outros usuários.
+Este app funciona como uma vitrine digital completa e conectada a um banco de dados real. Qualquer pessoa cadastrada pode anunciar itens à venda, enviar fotos diretamente da câmera ou galeria, e navegar para comprar produtos anunciados por outros usuários ou lojas. O app possui um sistema de chat para que os usuários possam conversar e negociar entre si, através de mensagens ou propostas. Também é possível editar o seu perfil e destacar seus produtos, para que eles fiquem mais chamativos na vitrine.
 
 ### Funcionalidades principais
 
 - **Cadastro e Login de usuários**, integrado ao banco de dados PostgreSQL com segurança.
 - **Vitrine de produtos** (abas _Início_ / _Explorar_), listando os itens mais recentes da comunidade com preços e condições.
-- **Anunciar, Editar e Excluir produtos**, permitindo que o usuário tire fotos na hora ou escolha da galeria, gerenciando seus próprios anúncios de forma nativa.
+- **Anunciar, Editar e Excluir produtos**, permitindo que o usuário tire fotos na hora ou escolha da galeria.
 - **Carrossel de Imagens**, com navegação fluida em anúncios com múltiplas fotos.
 - **Mensagens**, para conversar sobre negociações e enviar propostas.
 - **Perfil**, com os dados do usuário e acesso rápido à edição dos seus anúncios ativos.
@@ -33,11 +33,9 @@ O design das interfaces e o protótipo navegável foram desenvolvidos no Figma.
 Abaixo estão os diagramas que ilustram a arquitetura e as principais interações do sistema:
 
 **1. Diagrama de Casos de Uso**  
-_(Ilustra as principais interações dos utilizadores com as funcionalidades do sistema)_  
 ![Diagrama de Casos de Uso](/docs/DiagramaCasosDeUsoMarketplace2.png)
 
 **2. Diagrama de Classes**  
-_(Ilustra as principois classes do sistema)_  
 ![Nome do Diagrama 2](/docs/DiagramaDeClasses.png)
 
 ---
