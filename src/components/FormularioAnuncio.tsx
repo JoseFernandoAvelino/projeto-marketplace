@@ -1,9 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
+import { FileSystemUploadType } from "expo-file-system/legacy";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,7 +20,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { api } from "../lib/api";
+import { api, API_URL } from "../lib/api";
 import { CATEGORIAS, CONDICOES, lerPreco, Produto } from "../lib/produtos";
 import { usuarioAtual } from "../lib/sessao";
 import { Botao } from "./Botao";
@@ -31,6 +35,7 @@ interface FormularioAnuncioProps {
 export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
   const ehEdicao = produtoId !== undefined;
   const insets = useSafeAreaInsets();
+  const [fotos, setFotos] = useState<string[]>([]);
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("");
   const [preco, setPreco] = useState("");
@@ -57,11 +62,17 @@ export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
         setFazEntrega(p.faz_entrega);
         setAceitaTroca(p.aceita_troca);
       })
-      .catch((e) => Alert.alert("Erro", e instanceof Error ? e.message : "Erro ao carregar o anúncio."))
+      .catch((e) =>
+        Alert.alert(
+          "Erro",
+          e instanceof Error ? e.message : "Erro ao carregar o anúncio.",
+        ),
+      )
       .finally(() => setCarregandoProduto(false));
   }, [produtoId]);
 
   function limparFormulario() {
+    setFotos([]);
     setTitulo("");
     setCategoria("");
     setPreco("");
@@ -72,6 +83,59 @@ export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
     setAceitaTroca(false);
   }
 
+  const adicionarFoto = () => {
+    if (fotos.length >= 6) {
+      Alert.alert("Limite", "Você pode enviar no máximo 6 fotos.");
+      return;
+    }
+
+    Alert.alert("Adicionar Foto", "Escolha de onde deseja enviar a foto", [
+      { text: "Tirar Foto", onPress: abrirCamera },
+      { text: "Escolher da Galeria", onPress: abrirGaleria },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  };
+
+  const abrirCamera = async () => {
+    const permissao = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissao.status !== "granted") {
+      Alert.alert(
+        "Permissão Necessária",
+        "Precisamos de acesso à câmera para tirar fotos.",
+      );
+      return;
+    }
+
+    const resultado = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!resultado.canceled) {
+      setFotos([...fotos, resultado.assets[0].uri]);
+    }
+  };
+
+  const abrirGaleria = async () => {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!resultado.canceled) {
+      setFotos([...fotos, resultado.assets[0].uri]);
+    }
+  };
+
+  const removerFoto = (indexParaRemover: number) => {
+    setFotos(fotos.filter((_, index) => index !== indexParaRemover));
+  };
+
   async function salvar() {
     const usuario = usuarioAtual();
     if (!usuario) {
@@ -80,38 +144,79 @@ export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
     }
 
     const valor = lerPreco(preco);
-    if (!titulo.trim()) return Alert.alert("Atenção", "Informe o título do produto.");
+    if (fotos.length === 0)
+      return Alert.alert("Atenção", "Adicione pelo menos 1 foto.");
+    if (!titulo.trim())
+      return Alert.alert("Atenção", "Informe o título do produto.");
     if (!categoria) return Alert.alert("Atenção", "Escolha uma categoria.");
-    if (Number.isNaN(valor) || valor < 0) return Alert.alert("Atenção", "Informe um preço válido.");
-    if (!condicao) return Alert.alert("Atenção", "Escolha a condição do produto.");
-
-    const dados = {
-      usuario_id: usuario.id,
-      titulo: titulo.trim(),
-      categoria,
-      preco: valor,
-      condicao,
-      descricao: descricao.trim(),
-      localizacao: localizacao.trim(),
-      aceita_proposta: aceitaProposta,
-      faz_entrega: fazEntrega,
-      aceita_troca: aceitaTroca,
-    };
+    if (Number.isNaN(valor) || valor < 0)
+      return Alert.alert("Atenção", "Informe um preço válido.");
+    if (!condicao)
+      return Alert.alert("Atenção", "Escolha a condição do produto.");
 
     setSalvando(true);
     try {
+      const urlsFinais = [];
+
+      for (const uri of fotos) {
+        if (uri.startsWith("http")) {
+          urlsFinais.push(uri);
+        } else {
+          const response = await FileSystem.uploadAsync(
+            `${API_URL}/uploads`,
+            uri,
+            {
+              fieldName: "file",
+              httpMethod: "POST",
+              uploadType: FileSystemUploadType.MULTIPART,
+            },
+          );
+
+          if (response.status !== 200) {
+            throw new Error("Falha ao fazer upload da imagem");
+          }
+
+          const data = JSON.parse(response.body);
+
+          urlsFinais.push(`${API_URL}${data.url}`);
+        }
+      }
+
+      const dados = {
+        usuario_id: usuario.id,
+        imagens: urlsFinais,
+        titulo: titulo.trim(),
+        categoria,
+        preco: valor,
+        condicao,
+        descricao: descricao.trim(),
+        localizacao: localizacao.trim(),
+        aceita_proposta: aceitaProposta,
+        faz_entrega: fazEntrega,
+        aceita_troca: aceitaTroca,
+      };
+
       if (ehEdicao) {
         await api(`/produtos/${produtoId}`, { metodo: "PUT", corpo: dados });
         Alert.alert("Pronto!", "Anúncio atualizado.");
         router.back();
       } else {
-        const criado = await api<Produto>("/produtos", { metodo: "POST", corpo: dados });
+        const criado = await api<Produto>("/produtos", {
+          metodo: "POST",
+          corpo: dados,
+        });
         limparFormulario();
         Alert.alert("Pronto!", "Seu anúncio foi publicado.");
-        router.push({ pathname: "/produto/[id]", params: { id: String(criado.id) } });
+        router.push({
+          pathname: "/produto/[id]",
+          params: { id: String(criado.id) },
+        });
       }
     } catch (e) {
-      Alert.alert("Erro", e instanceof Error ? e.message : "Não foi possível salvar o anúncio.");
+      Alert.alert(
+        "Erro",
+        e instanceof Error ? e.message : "Não foi possível salvar o anúncio.",
+      );
     } finally {
       setSalvando(false);
     }
@@ -142,30 +247,65 @@ export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
           <View className="px-5 pt-5 mb-6">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-base font-bold text-[#111]">
-                Fotos do Produto
+                Fotos do Produto *
               </Text>
               <View className="bg-[#EAF3EE] px-2 py-1 rounded-md">
                 <Text className="text-[10px] font-bold text-[#00995D]">
-                  Até 6 fotos
+                  {fotos.length}/6 fotos
                 </Text>
               </View>
             </View>
-            <TouchableOpacity
-              className="w-24 h-24 bg-[#E8EEF5] rounded-xl items-center justify-center border border-[#D3DAEF] border-dashed"
-              onPress={() =>
-                Alert.alert("Em breve", "O envio de fotos pelo app será adicionado na próxima etapa.")
-              }
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="flex-row"
             >
-              <View className="w-10 h-10 bg-[#00995D] rounded-full items-center justify-center mb-1">
-                <MaterialIcons name="add-a-photo" size={20} color="#FFF" />
-              </View>
-              <Text className="text-[10px] font-bold text-[#006D43]">
-                Adicionar Fotos
-              </Text>
-              <Text className="text-[9px] text-[#6D7A70]">
-                Galeria / Câmera
-              </Text>
-            </TouchableOpacity>
+              {fotos.length < 6 && (
+                <TouchableOpacity
+                  className="w-24 h-24 mr-3 bg-[#E8EEF5] rounded-xl items-center justify-center border border-[#D3DAEF] border-dashed"
+                  onPress={adicionarFoto}
+                >
+                  <View className="w-10 h-10 bg-[#00995D] rounded-full items-center justify-center mb-1">
+                    <MaterialIcons name="add-a-photo" size={20} color="#FFF" />
+                  </View>
+                  <Text className="text-[10px] font-bold text-[#006D43]">
+                    Adicionar Fotos
+                  </Text>
+                  <Text className="text-[9px] text-[#6D7A70]">
+                    Galeria / Câmera
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {fotos.map((uri, index) => (
+                <View
+                  key={index}
+                  className="w-24 h-24 rounded-xl mr-3 relative border border-[#E8EEF5]"
+                >
+                  <Image
+                    source={{ uri }}
+                    className="w-full h-full rounded-xl"
+                  />
+
+                  {index === 0 && (
+                    <View className="absolute top-1.5 left-1.5 bg-[#00995D] px-1.5 py-0.5 rounded">
+                      <Text className="text-[8px] font-bold text-white uppercase">
+                        Principal
+                      </Text>
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    onPress={() => removerFoto(index)}
+                    className="absolute top-1.5 right-1.5 bg-[#111] rounded-full p-1 opacity-80"
+                  >
+                    <MaterialIcons name="close" size={12} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+
             <Text className="text-[11px] text-[#6D7A70] mt-2 leading-tight">
               Dica: Anúncios com 3 ou mais fotos nítidas vendem até 4x mais
               rápido!
@@ -319,7 +459,11 @@ export function FormularioAnuncio({ produtoId }: FormularioAnuncioProps) {
       >
         <Botao
           titulo={
-            salvando ? "Salvando..." : ehEdicao ? "Salvar Alterações" : "Publicar Anúncio"
+            salvando
+              ? "Salvando..."
+              : ehEdicao
+                ? "Salvar Alterações"
+                : "Publicar Anúncio"
           }
           icone={ehEdicao ? "check" : "send"}
           onPress={salvar}

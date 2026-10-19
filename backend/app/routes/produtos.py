@@ -1,16 +1,17 @@
+import os
+import shutil
 from typing import Literal
+from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 from app.db import executar, executar_um
 
 router = APIRouter(tags=["Produtos"])
 
-
 Categoria = Literal["celulares", "moveis", "moda", "veiculos", "esportes", "livros", "brinquedos", "outras"]
 Condicao = Literal["Novo", "Ótimo estado", "Usado"]
-
 
 class NovoProduto(BaseModel):
     usuario_id: int
@@ -119,13 +120,28 @@ def editar_produto(produto_id: int, dados: EdicaoProduto):
     )
 
 
-@router.delete("/produtos/{produto_id}")
-def excluir_produto(produto_id: int, usuario_id: int):
-    """Exclui um anúncio. Só o dono pode excluir (envie ?usuario_id=...)."""
-    excluido = executar_um(
-        "DELETE FROM produtos WHERE id = %s AND vendedor_id = %s RETURNING id",
-        (produto_id, usuario_id),
-    )
-    if not excluido:
-        raise HTTPException(404, "Produto não encontrado ou você não é o dono.")
-    return {"mensagem": "Anúncio excluído."}
+@router.delete("/produtos/{id}")
+def excluir_produto(id: int):
+    from app.db import executar
+    
+    executar("DELETE FROM mensagens WHERE conversa_id IN (SELECT id FROM conversas WHERE produto_id = %s)", (id,))
+    executar("DELETE FROM propostas WHERE conversa_id IN (SELECT id FROM conversas WHERE produto_id = %s)", (id,))
+    
+    executar("DELETE FROM conversas WHERE produto_id = %s", (id,))
+    
+    executar("DELETE FROM produtos WHERE id = %s", (id,))
+    
+    return {"sucesso": True, "mensagem": "Produto excluído permanentemente"}
+
+@router.post("/uploads")
+def upload_imagem(file: UploadFile = File(...)):
+    os.makedirs("uploads", exist_ok=True)
+    
+    extensao = file.filename.split(".")[-1] if file.filename and "." in file.filename else "jpg"
+    nome_arquivo = f"{uuid4().hex}.{extensao}"
+    caminho_salvo = f"uploads/{nome_arquivo}"
+    
+    with open(caminho_salvo, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"url": f"/{caminho_salvo}"}

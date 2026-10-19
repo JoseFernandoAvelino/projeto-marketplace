@@ -9,6 +9,7 @@ interface AnuncioPerfilCardProps {
   imagem?: string;
   onPress?: () => void;
   onEditar?: () => void;
+  onExcluir: () => void;
 }
 
 export function AnuncioPerfilCard({
@@ -19,13 +20,22 @@ export function AnuncioPerfilCard({
   imagem,
   onPress,
   onEditar,
+  onExcluir,
 }: AnuncioPerfilCardProps) {
   return (
     <View className="bg-white rounded-2xl mb-4 border border-[#F2F5F9] shadow-sm elevation-1 overflow-hidden">
-      <TouchableOpacity className="flex-row p-3" onPress={onPress} activeOpacity={0.8}>
+      <TouchableOpacity
+        className="flex-row p-3"
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
         <View className="w-20 h-20 bg-[#E8EEF5] rounded-xl items-center justify-center overflow-hidden">
           {imagem ? (
-            <Image source={{ uri: imagem }} className="w-full h-full" resizeMode="cover" />
+            <Image
+              source={{ uri: imagem }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
           ) : (
             <MaterialIcons name="image" size={28} color="#A0AAB2" />
           )}
@@ -70,14 +80,20 @@ export function AnuncioPerfilCard({
           />
           <Text className="text-xs font-bold text-[#6D7A70] ml-1">Pausar</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onExcluir}
+          className="flex-1 flex-row items-center justify-center py-1"
+        >
+          <MaterialIcons name="delete-outline" size={16} color="#DC2626" />
+          <Text className="text-[#DC2626] font-bold text-[11px] mt-1">
+            Excluir
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity className="flex-1 flex-row items-center justify-center py-1">
           <MaterialIcons name="rocket-launch" size={14} color="#F59E0B" />
           <Text className="text-xs font-bold text-[#F59E0B] ml-1">
             Destacar
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="px-2 py-1 items-center justify-center">
-          <MaterialIcons name="more-vert" size={16} color="#111" />
         </TouchableOpacity>
       </View>
     </View>

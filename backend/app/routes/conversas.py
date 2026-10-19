@@ -17,8 +17,6 @@ class NovaMensagem(BaseModel):
 
 
 def abrir_conversa(produto_id, comprador_id):
-    """Abre a conversa do comprador com o vendedor do produto (ou devolve a que já existe).
-    Também é usada em propostas.py."""
     produto = executar_um("SELECT vendedor_id FROM produtos WHERE id = %s", (produto_id,))
     if not produto:
         raise HTTPException(404, "Produto não encontrado.")
@@ -40,7 +38,6 @@ def abrir_conversa(produto_id, comprador_id):
 
 @router.get("/conversas")
 def listar_conversas(usuario_id: int):
-    """Conversas do usuário (comprando ou vendendo), com o produto, os nomes e a última mensagem."""
     return executar(
         """SELECT conversas.*,
                   produtos.titulo AS produto_titulo,
@@ -62,14 +59,11 @@ def listar_conversas(usuario_id: int):
 
 @router.post("/conversas")
 def iniciar_conversa(dados: AbrirConversa):
-    """Botão "Enviar Mensagem" na tela do produto."""
     return abrir_conversa(dados.produto_id, dados.usuario_id)
 
 
 @router.get("/conversas/{conversa_id}/mensagens")
 def listar_mensagens(conversa_id: int):
-    """Mensagens do chat, da mais antiga para a mais nova.
-    As mensagens de proposta vêm com o valor e o status da proposta."""
     return executar(
         """SELECT mensagens.*, propostas.valor AS proposta_valor, propostas.status AS proposta_status
            FROM mensagens

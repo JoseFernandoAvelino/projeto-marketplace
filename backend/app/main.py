@@ -4,18 +4,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.routes import usuarios
-from app.routes import produtos
-from app.routes import uploads
-from app.routes import conversas
-from app.routes import propostas
+from app.routes import conversas, produtos, propostas, uploads, usuarios
 
 app = FastAPI(
     title="API do Marketplace",
     description="Backend do App Marketplace: usuários, produtos, chat e propostas.",
 )
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", tags=["Início"])

@@ -10,8 +10,6 @@ router = APIRouter(tags=["Fotos"])
 
 @router.post("/uploads", status_code=201)
 def enviar_fotos(request: Request, fotos: list[UploadFile] = File(...)):
-    """Recebe até 6 fotos (form-data, campo "fotos") e devolve as URLs delas.
-    O app manda essas URLs no campo "imagens" ao publicar ou editar o produto."""
     if len(fotos) > 6:
         raise HTTPException(400, "Envie no máximo 6 fotos.")
 

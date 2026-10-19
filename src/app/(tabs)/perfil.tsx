@@ -1,7 +1,14 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AnuncioPerfilCard } from "../../components/AnuncioPerfilCard";
 import { Botao } from "../../components/Botao";
@@ -24,13 +31,41 @@ export default function Perfil() {
         .then(setAnuncios)
         .catch(() => setAnuncios([]))
         .finally(() => setCarregando(false));
-    }, [usuario?.id])
+    }, [usuario?.id]),
   );
 
   function sairDaConta() {
     sair();
     router.replace("/");
   }
+
+  const confirmarExclusao = (id: number) => {
+    Alert.alert(
+      "Excluir Anúncio",
+      "Tem certeza que deseja apagar este anúncio permanentemente?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: () => executarExclusao(id),
+        },
+      ],
+    );
+  };
+
+  const executarExclusao = async (id: number) => {
+    try {
+      await api(`/produtos/${id}`, { metodo: "DELETE" });
+      setAnuncios((prev) => prev.filter((p) => p.id !== id));
+      Alert.alert("Sucesso", "O anúncio foi removido permanentemente.");
+    } catch (error: any) {
+      Alert.alert(
+        "Erro",
+        error.message || "Não foi possível excluir o anúncio.",
+      );
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
@@ -159,13 +194,20 @@ export default function Perfil() {
                 titulo={anuncio.titulo}
                 preco={formatarPreco(anuncio.preco)}
                 local={anuncio.localizacao}
-                imagem={anuncio.imagens[0]}
+                imagem={anuncio.imagens?.[0]}
                 onPress={() =>
-                  router.push({ pathname: "/produto/[id]", params: { id: String(anuncio.id) } })
+                  router.push({
+                    pathname: "/produto/[id]",
+                    params: { id: String(anuncio.id) },
+                  })
                 }
                 onEditar={() =>
-                  router.push({ pathname: "/editar/[id]", params: { id: String(anuncio.id) } })
+                  router.push({
+                    pathname: "/editar/[id]",
+                    params: { id: String(anuncio.id) },
+                  })
                 }
+                onExcluir={() => confirmarExclusao(anuncio.id)}
               />
             ))
           )}

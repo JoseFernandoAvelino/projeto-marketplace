@@ -3,7 +3,11 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
+  FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -26,14 +30,26 @@ export default function DetalhesProduto() {
   const insets = useSafeAreaInsets();
   const [produto, setProduto] = useState<Produto | null>(null);
   const [erro, setErro] = useState("");
+  const [fotoAtiva, setFotoAtiva] = useState(0);
+  const larguraEcra = Dimensions.get("window").width;
+  const aoMudarFoto = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const slide = Math.ceil(event.nativeEvent.contentOffset.x / larguraEcra);
+    if (slide !== fotoAtiva) {
+      setFotoAtiva(slide);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
       setErro("");
       api<Produto>(`/produtos/${id}`)
         .then(setProduto)
-        .catch((e) => setErro(e instanceof Error ? e.message : "Erro ao carregar o produto."));
-    }, [id])
+        .catch((e) =>
+          setErro(
+            e instanceof Error ? e.message : "Erro ao carregar o produto.",
+          ),
+        );
+    }, [id]),
   );
 
   if (erro || !produto) {
@@ -44,7 +60,9 @@ export default function DetalhesProduto() {
           {erro ? (
             <>
               <MaterialIcons name="error-outline" size={40} color="#A0AAB2" />
-              <Text className="text-sm text-[#6D7A70] text-center mt-2">{erro}</Text>
+              <Text className="text-sm text-[#6D7A70] text-center mt-2">
+                {erro}
+              </Text>
             </>
           ) : (
             <ActivityIndicator size="large" color="#006D43" />
@@ -55,7 +73,6 @@ export default function DetalhesProduto() {
   }
 
   const ehDono = usuarioAtual()?.id === produto.vendedor_id;
-  const imagem = produto.imagens[0];
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
@@ -64,28 +81,53 @@ export default function DetalhesProduto() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View className="w-full h-80 bg-[#E8EEF5] relative items-center justify-center">
-          {imagem ? (
-            <Image
-              source={{ uri: imagem }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
+        <View className="w-full h-80 bg-[#E8EEF5] relative">
+          {produto.imagens && produto.imagens.length > 0 ? (
+            <>
+              <FlatList
+                data={produto.imagens}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={aoMudarFoto}
+                scrollEventThrottle={16}
+                keyExtractor={(item, index) => `${item}-${index}`}
+                style={{ width: larguraEcra, height: 320 }}
+                renderItem={({ item }) => (
+                  <Image
+                    source={{ uri: item }}
+                    style={{ width: larguraEcra, height: 320 }}
+                    resizeMode="cover"
+                  />
+                )}
+              />
+
+              {produto.imagens.length > 1 && (
+                <View className="absolute bottom-4 left-0 right-0 flex-row justify-center space-x-1.5 pointer-events-none">
+                  {produto.imagens.map((_, index) => (
+                    <View
+                      key={index}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        fotoAtiva === index
+                          ? "w-6 bg-[#006D43]"
+                          : "w-2 bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </View>
+              )}
+            </>
           ) : (
-            <MaterialIcons name="image" size={64} color="#A0AAB2" />
+            <View className="w-full h-full items-center justify-center">
+              <MaterialIcons name="image" size={64} color="#A0AAB2" />
+            </View>
           )}
+
           <TouchableOpacity className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm">
             <MaterialIcons name="favorite-border" size={20} color="#555" />
           </TouchableOpacity>
-          {produto.imagens.length > 0 && (
-            <View className="absolute bottom-4 right-4 bg-black/60 px-3 py-1 rounded-full flex-row items-center">
-              <MaterialIcons name="photo-library" size={12} color="#FFF" />
-              <Text className="text-white text-xs font-bold ml-1">
-                1/{produto.imagens.length}
-              </Text>
-            </View>
-          )}
         </View>
+
         <View className="bg-white rounded-b-3xl px-5 pt-5 pb-6 shadow-sm elevation-1">
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center bg-[#F2F5F9] px-2 py-1 rounded-md">
@@ -134,10 +176,14 @@ export default function DetalhesProduto() {
           </Text>
           <View className="flex-row flex-wrap mt-3">
             {produto.aceita_proposta && (
-              <Text className="text-[11px] font-bold text-[#00995D] mr-4">✓ Aceita propostas</Text>
+              <Text className="text-[11px] font-bold text-[#00995D] mr-4">
+                ✓ Aceita propostas
+              </Text>
             )}
             {produto.aceita_troca && (
-              <Text className="text-[11px] font-bold text-[#00995D]">✓ Aceita trocas</Text>
+              <Text className="text-[11px] font-bold text-[#00995D]">
+                ✓ Aceita trocas
+              </Text>
             )}
           </View>
         </View>
@@ -170,7 +216,10 @@ export default function DetalhesProduto() {
             titulo="Editar anúncio"
             icone="edit"
             onPress={() =>
-              router.push({ pathname: "/editar/[id]", params: { id: String(produto.id) } })
+              router.push({
+                pathname: "/editar/[id]",
+                params: { id: String(produto.id) },
+              })
             }
             style={{ marginTop: 0 }}
           />

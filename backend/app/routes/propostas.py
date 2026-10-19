@@ -21,14 +21,12 @@ class RespostaProposta(BaseModel):
 
 
 def em_reais(valor):
-    """1000.5 -> 'R$ 1.000,50'"""
     texto = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"R$ {texto}"
 
 
 @router.post("/propostas", status_code=201)
 def fazer_proposta(dados: NovaProposta):
-    """Botão "Fazer Proposta". Abre a conversa (se ainda não existir) e coloca a proposta no chat."""
     produto = executar_um("SELECT aceita_proposta FROM produtos WHERE id = %s", (dados.produto_id,))
     if produto and not produto["aceita_proposta"]:
         raise HTTPException(400, "Este anúncio não aceita propostas.")
@@ -49,7 +47,6 @@ def fazer_proposta(dados: NovaProposta):
 
 @router.put("/propostas/{proposta_id}")
 def responder_proposta(proposta_id: int, dados: RespostaProposta):
-    """O vendedor aceita ou recusa a proposta."""
     proposta = executar_um(
         """SELECT propostas.*, conversas.vendedor_id
            FROM propostas JOIN conversas ON conversas.id = propostas.conversa_id

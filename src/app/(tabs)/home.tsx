@@ -27,11 +27,10 @@ export default function Home() {
     }
   }
 
-  // Recarrega a lista sempre que a tela aparece (ex.: depois de publicar um anúncio)
   useFocusEffect(
     useCallback(() => {
       carregarProdutos();
-    }, [])
+    }, []),
   );
 
   function pesquisar() {

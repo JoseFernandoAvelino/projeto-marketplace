@@ -21,7 +21,6 @@ class Login(BaseModel):
 
 @router.post("/usuarios", status_code=201)
 def cadastrar(dados: NovoUsuario):
-    """Cadastro de um novo usuário."""
     cpf = "".join(c for c in dados.cpf if c.isdigit()) 
 
     if not dados.nome.strip() or "@" not in dados.email:
@@ -43,7 +42,6 @@ def cadastrar(dados: NovoUsuario):
 
 @router.post("/login")
 def login(dados: Login):
-    """Confere e-mail e senha e devolve o usuário. O app guarda o id dele."""
     usuario = executar_um("SELECT * FROM usuarios WHERE email = %s", (dados.email,))
 
     if not usuario or not bcrypt.checkpw(dados.senha.encode(), usuario["senha"].encode()):
@@ -54,7 +52,6 @@ def login(dados: Login):
 
 @router.get("/usuarios/{usuario_id}")
 def buscar_usuario(usuario_id: int):
-    """Dados de um usuário (tela de perfil)."""
     usuario = executar_um("SELECT id, nome, email, criado_em FROM usuarios WHERE id = %s", (usuario_id,))
     if not usuario:
         raise HTTPException(404, "Usuário não encontrado.")
