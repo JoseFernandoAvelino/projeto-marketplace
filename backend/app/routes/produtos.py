@@ -28,7 +28,6 @@ class NovoProduto(BaseModel):
 
 
 class EdicaoProduto(BaseModel):
-    """Na edição, só o usuario_id é obrigatório. Envie apenas os campos que mudaram."""
     usuario_id: int
     titulo: str | None = Field(None, min_length=1, max_length=70)
     categoria: Categoria | None = None
@@ -51,7 +50,6 @@ SELECT_PRODUTO = """
 
 @router.get("/produtos")
 def listar_produtos(busca: str | None = None, categoria: str | None = None, vendedor_id: int | None = None):
-    """Lista os produtos, dos mais novos para os mais antigos. Todos os filtros são opcionais."""
     filtros = []
     valores = []
 
@@ -79,7 +77,6 @@ def buscar_produto(produto_id: int):
 
 @router.post("/produtos", status_code=201)
 def publicar_produto(dados: NovoProduto):
-    """Publica um novo produto. O vendedor é o usuario_id enviado."""
     return executar_um(
         """INSERT INTO produtos
              (vendedor_id, titulo, descricao, categoria, preco, condicao,
@@ -95,7 +92,6 @@ def publicar_produto(dados: NovoProduto):
 
 @router.put("/produtos/{produto_id}")
 def editar_produto(produto_id: int, dados: EdicaoProduto):
-    """Edita um produto. Só o dono do anúncio pode editar."""
     produto = executar_um("SELECT * FROM produtos WHERE id = %s", (produto_id,))
 
     if not produto:

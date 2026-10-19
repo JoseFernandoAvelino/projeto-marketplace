@@ -19,7 +19,7 @@ def enviar_fotos(request: Request, fotos: list[UploadFile] = File(...)):
             raise HTTPException(400, "Envie apenas imagens.")
 
         extensao = os.path.splitext(foto.filename or "")[1].lower() or ".jpg"
-        nome_arquivo = uuid.uuid4().hex + extensao  # nome único para não sobrescrever
+        nome_arquivo = uuid.uuid4().hex + extensao
         with open(os.path.join(PASTA_UPLOADS, nome_arquivo), "wb") as arquivo:
             arquivo.write(foto.file.read())
 

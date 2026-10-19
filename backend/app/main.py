@@ -1,4 +1,3 @@
-import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +31,3 @@ app.include_router(produtos.router)
 app.include_router(uploads.router)
 app.include_router(conversas.router)
 app.include_router(propostas.router)
-
-os.makedirs(uploads.PASTA_UPLOADS, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=uploads.PASTA_UPLOADS), name="fotos")
