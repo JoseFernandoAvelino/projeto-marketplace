@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarraBusca } from "../../components/BarraBusca";
+import { CabecalhoAba } from "../../components/CabecalhoAba";
 import { FiltroCategoria } from "../../components/FiltroCategoria";
 import { ListaProdutos } from "../../components/ListaProdutos";
 import { api } from "../../lib/api";
@@ -39,27 +40,7 @@ export default function Home() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
-      <View className="flex-row justify-between items-center px-5 pt-2 pb-4">
-        <View className="flex-row items-center flex-1">
-          <MaterialIcons name="storefront" size={28} color="#006D43" />
-          <View className="ml-2 flex-1">
-            <Text
-              className="text-base font-black text-[#006D43]"
-              numberOfLines={1}
-            >
-              App Marketplace
-            </Text>
-            <Text className="text-xs text-[#6D7A70] font-bold mt-0.5">
-              Início
-            </Text>
-          </View>
-        </View>
-        <View className="flex-row items-center pl-4">
-          <View className="w-9 h-9 rounded-full bg-[#E8EEF5] items-center justify-center overflow-hidden">
-            <MaterialIcons name="person" size={24} color="#006D43" />
-          </View>
-        </View>
-      </View>
+      <CabecalhoAba titulo="Início" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}

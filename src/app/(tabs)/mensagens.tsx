@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { CabecalhoAba } from "../../components/CabecalhoAba";
 import { ConversaCard } from "../../components/ConversaCard";
 
 export default function Mensagens() {
@@ -48,20 +49,20 @@ export default function Mensagens() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
-      <View className="px-5 pt-3 pb-4 bg-white shadow-sm elevation-1 z-10">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-black text-[#111]">Mensagens</Text>
+      <View className="bg-white shadow-sm elevation-1 z-10">
+        <CabecalhoAba titulo="Mensagens" />
+        <View className="px-5 pb-4 flex-row items-center space-x-3">
+          <View className="flex-1 flex-row items-center bg-[#F2F5F9] rounded-xl px-4 py-2.5">
+            <MaterialIcons name="search" size={20} color="#6D7A70" />
+            <TextInput
+              className="flex-1 ml-2 text-sm text-[#111] p-0"
+              placeholder="Buscar conversas..."
+              placeholderTextColor="#A0AAB2"
+            />
+          </View>
           <TouchableOpacity className="w-10 h-10 rounded-full bg-[#E8EEF5] items-center justify-center">
             <MaterialIcons name="filter-list" size={22} color="#006D43" />
           </TouchableOpacity>
-        </View>
-        <View className="flex-row items-center bg-[#F2F5F9] rounded-xl px-4 py-2.5">
-          <MaterialIcons name="search" size={20} color="#6D7A70" />
-          <TextInput
-            className="flex-1 ml-2 text-sm text-[#111] p-0"
-            placeholder="Buscar conversas..."
-            placeholderTextColor="#A0AAB2"
-          />
         </View>
       </View>
       <ScrollView

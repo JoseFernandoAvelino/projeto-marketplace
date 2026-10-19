@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarraBusca } from "../../components/BarraBusca";
+import { CabecalhoAba } from "../../components/CabecalhoAba";
 import { CategoriaQuadrado } from "../../components/CategoriaQuadrado";
 import { FiltroChip } from "../../components/FiltroChip";
 import { ListaProdutos } from "../../components/ListaProdutos";
@@ -40,7 +41,7 @@ export default function Explorar() {
   useEffect(() => {
     if (params.busca !== undefined) setBusca(params.busca);
   }, [params.busca]);
-  
+
   useEffect(() => {
     const espera = setTimeout(() => buscarProdutos(busca, categoria), 400);
     return () => clearTimeout(espera);
@@ -48,11 +49,11 @@ export default function Explorar() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FC]" edges={["top"]}>
-      <View className="px-5 pt-3 pb-4 bg-white shadow-sm elevation-1 z-10">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-black text-[#111]">Explorar</Text>
+      <View className="bg-white shadow-sm elevation-1 z-10">
+        <CabecalhoAba titulo="Explorar" />
+        <View className="px-5 pb-4">
+          <BarraBusca value={busca} onChangeText={setBusca} />
         </View>
-        <BarraBusca value={busca} onChangeText={setBusca} />
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
