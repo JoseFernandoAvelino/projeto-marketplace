@@ -1,15 +1,12 @@
 import os
 import uuid
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi import HTTPException
 
 PASTA_UPLOADS = "uploads"
 
-router = APIRouter(tags=["Fotos"])
 
-
-@router.post("/uploads", status_code=201)
-def enviar_fotos(request: Request, fotos: list[UploadFile] = File(...)):
+def enviar_fotos(request, fotos):
     if len(fotos) > 6:
         raise HTTPException(400, "Envie no máximo 6 fotos.")
 
